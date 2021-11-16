@@ -1,24 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import {
+  useLocation,
+  BrowserRouter as Router,
+  Redirect,
+  Switch,
+  Route,
+} from "react-router-dom";
+
+import Login from "./Login";
+import { RoomList } from "./Messenger";
+import { SecureRoute } from "./SecureRoute";
 
 function App() {
+  let location = useLocation();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router style={{ height: "100%",  }}>
+      <Redirect to={{ pathname: "/message", state: { from: location } }} />
+      <Switch>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <SecureRoute path="/message">
+          <RoomList />
+        </SecureRoute>
+        <SecureRoute path="/add-room"></SecureRoute>
+        <SecureRoute path="/chat-room/:room"></SecureRoute>
+      </Switch>
+    </Router>
   );
 }
 
