@@ -51,20 +51,22 @@ const Chat = ({ clickUser }) => {
 
   const [allRoomChat, setAllRoomChat] = useState("");
 
+  //get room id
   useEffect(() => {
-    if(clickUser) {
-      getRoomUserID(setAllRoomChat);
-    }
-  }, [setAllRoomChat, clickUser]);
+    getRoomUserID(setAllRoomChat)
+  }, [setAllRoomChat]);
 
   useEffect(() => {
+    setMessage([]);
     getMessage(roomid, setMessage);
   }, [roomid]);
 
+  //input text chat
   const onTextInputChange = (e) => {
     setTextChat((prev) => e.target.value);
   };
 
+  //get room id
   useEffect(() => {
     let rooms = [];
 
@@ -93,6 +95,8 @@ const Chat = ({ clickUser }) => {
     }
   }, [allRoomChat, clickUser, nickname, setRoomid]);
 
+  //click send message
+  //send the time right at the moment, room id, sender, message
   const onSendBtnClick = () => {
     const moment = Moment(new Date()).format("DD/MM/YYYY HH:mm:ss");
     const send = {
@@ -108,10 +112,10 @@ const Chat = ({ clickUser }) => {
   return (
     <Grid item xs={12} md={12} style={{ height: "100%", width: "100%" }}>
       <div style={{ width: "100%", height: "443px", borderRadius: "10px" }}>
-        <Scroll>
+        {clickUser ? (<Scroll>
           {message.map((chat) => {
             return (
-              <Card key={chat[1].date} sx={{ minWidth: 275, borderRadius:"0px" }}>
+              <Card key={chat[1].date} sx={{ minWidth: 275, borderRadius:"0px", }}>
                 <CardContent style={chat[1].sender === nickname ? styleLeft : styleRight}>
                   
                   {chat[1].sender === nickname ? (
@@ -127,8 +131,10 @@ const Chat = ({ clickUser }) => {
               </Card>
             );
           })}
-        </Scroll>
+        </Scroll>) : (<></>)}
+        
       </div>
+      
       <TextField
         type="text"
         fullWidth

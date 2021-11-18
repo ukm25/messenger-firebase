@@ -76,6 +76,7 @@ const createRoomUsers = (userFirst, userSecond, id) => {
   newUserSecond.set({ nickname: userSecond, roomid: id });
 };
 
+//get all room user
 const getRoomUserID = (setAllRoomChat) => {
   const ref = firebase.database().ref();
   ref
@@ -88,6 +89,7 @@ const getRoomUserID = (setAllRoomChat) => {
     });
 };
 
+//save message to database (ref: chats)
 const sendMessage = (chat) => {
   const newMessage = firebase.database().ref("chats/").push();
   newMessage.set(chat);
@@ -101,7 +103,6 @@ const getMessage = async (roomid, setMessage) => {
     .equalTo(roomid)
     .on("value", (snapshot) => {
       if(snapshot.exists()) {
-        setMessage([]);
         setMessage(Object.entries(snapshot.val()));
       }
       

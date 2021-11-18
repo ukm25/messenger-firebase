@@ -44,7 +44,7 @@ const ListUser = ({ clickUser, setClickUser }) => {
         );
       });
       return usersMap.map((user) => (
-        <User style={clickUser === Object.entries(user[1])[0][1] ? {backgroundColor:"blue"} : {backgroundColor:"black"}} key={user[0]} user={Object.entries(user[1])[0][1]} setClickUser={setClickUser} />
+        <User setClickUser={setClickUser} clickUser={clickUser} user={Object.entries(user[1])[0][1]}/>
       
         ));
     } else {
@@ -53,7 +53,7 @@ const ListUser = ({ clickUser, setClickUser }) => {
   };
 
   return (
-    <>{console.log(clickUser)}
+    <>
       <Typography variant="h5" gutterBottom style={{ paddingLeft: "16px", }}>
           {nickname}
           <Button variant="contained" onClick={onLogoutBtnClick}>
