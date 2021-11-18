@@ -40,7 +40,7 @@ const Login = () => {
           alignItems="center"
           style={{ height: "100%" }}
         >
-          <Grid item xs={9} md={5} sm={6} lg={4}>
+          <Grid item={true} xs={9} md={5} sm={6} lg={4}>
             <Typography
               variant="h5"
               gutterBottom

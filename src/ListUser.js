@@ -3,6 +3,7 @@ import List from "@mui/material/List";
 import { useHistory } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import styled from "@emotion/styled";
 
 import User from "./User";
 
@@ -13,7 +14,12 @@ const style = {
   maxWidth: 360,
 };
 
-const ListUser = ({ setClickUser }) => {
+const Scroll = styled.div`
+  height: 429px;
+  overflow-y: scroll;
+`;
+
+const ListUser = ({ clickUser, setClickUser }) => {
   const [users, setUsers] = useState();
   const [nickname, setNickName] = useState("");
   const history = useHistory();
@@ -38,15 +44,16 @@ const ListUser = ({ setClickUser }) => {
         );
       });
       return usersMap.map((user) => (
-        <User key={user[0]} user={Object.entries(user[1])[0][1]} setClickUser={setClickUser} />
-      ));
+        <User style={clickUser === Object.entries(user[1])[0][1] ? {backgroundColor:"blue"} : {backgroundColor:"black"}} key={user[0]} user={Object.entries(user[1])[0][1]} setClickUser={setClickUser} />
+      
+        ));
     } else {
       return <></>;
     }
   };
 
   return (
-    <>
+    <>{console.log(clickUser)}
       <Typography variant="h5" gutterBottom style={{ paddingLeft: "16px", }}>
           {nickname}
           <Button variant="contained" onClick={onLogoutBtnClick}>
@@ -54,7 +61,10 @@ const ListUser = ({ setClickUser }) => {
           </Button>
         </Typography>
       <List sx={style} component="nav" aria-label="mailbox folders">
+        <Scroll>
         {renderUsers(users)}
+        </Scroll>
+        
       </List>
     </>
   );

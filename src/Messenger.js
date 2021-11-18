@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 
 import ListUser from "./ListUser";
@@ -11,20 +11,16 @@ const RoomList = () => {
     <Grid
       container
       spacing={2}
-      xs={12}
-      md={12}
-      sm={9}
-      lg={8}
       style={{
         border: "1px ridge",
         margin: "0px",
-        width: "100%",
+        width: "70%",
         height: "500px",
         borderRadius: "10px",
       }}
     >
       <Grid
-        item
+        item={true}
         xs={3}
         md={3}
         style={{
@@ -32,10 +28,10 @@ const RoomList = () => {
           paddingLeft: "0px",
         }}
       >
-        <ListUser setClickUser={setClickUser}/>
+        <ListUser clickUser={clickUser} setClickUser={setClickUser}/>
       </Grid>
       <Grid
-        item
+        item={true}
         xs={9}
         md={9}
         style={{ padding: "0px", height: "100%", width: "100%" }}

@@ -1,56 +1,71 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
 import Moment from "moment";
+import styled from "@emotion/styled";
 
 import { sendMessage, getRoomUserID, getMessage } from "./Firebase";
 
+const Scroll = styled.div`
+  height: 443px;
+  overflow-y: scroll;
+`;
+
+const DateMessage = styled.span`
+font-size:13px`;
+
+const Sender = styled.span`
+font-size: 17px;
+  font-weight: bold;
+  color: green;
+`;
+
+const styleLeft = {
+  position: "relative",
+  background: "#dcf8c6",
+  borderRadius: ".4em",
+  marginTop: "5px",
+  width:"60%",
+  right: "5%",
+  float:"right",
+};
+
+const styleRight = {
+  position: "relative",
+  background: "lightblue",
+  borderRadius: ".4em",
+  marginTop: "5px",
+  maxWidth:"60%",
+  left: "5%",
+};
 const Chat = ({ clickUser }) => {
   const [textChat, setTextChat] = useState("");
   const [roomid, setRoomid] = useState("");
-  const [allMessage, setAllMessage] = useState();
-  const [chatMessage, setChatMessage] = useState();
+  const [message, setMessage] = useState([]);
 
   const nickname = localStorage.getItem("nickname");
 
   const [allRoomChat, setAllRoomChat] = useState("");
 
   useEffect(() => {
-    getRoomUserID(setAllRoomChat);
-  }, [setAllRoomChat]);
+    if(clickUser) {
+      getRoomUserID(setAllRoomChat);
+    }
+  }, [setAllRoomChat, clickUser]);
 
-  // useEffect(() => {
-  //   //get all message
-  //   getMessage(roomid, setAllMessage);
-  // }, [setAllMessage, roomid]);
-
-  // useEffect(() => {
-  //   //filter this chat message
-
-  //   let chatMessages = [];
-  //   if (allMessage && roomid) {
-  //     console.log("@@")
-  //     for (let i = 0; i < allMessage.length; i++) {
-  //       if (allMessage[1].roomid === roomid) {
-  //         chatMessages = [...chatMessages, allMessage[1]];
-  //       }
-  //     }
-  //   }
-
-  //   setChatMessage(chatMessages);
-  // }, [allMessage, roomid]);
+  useEffect(() => {
+    getMessage(roomid, setMessage);
+  }, [roomid]);
 
   const onTextInputChange = (e) => {
     setTextChat((prev) => e.target.value);
   };
 
   useEffect(() => {
-    //load roomid
     let rooms = [];
 
     if (allRoomChat) {
@@ -75,8 +90,6 @@ const Chat = ({ clickUser }) => {
           }
         }
       }
-      // console.log("a", rooms.filter((item, index) => rooms.indexOf(item) !== index))
-      // setRoomid(rooms.filter((item, index) => rooms.indexOf(item) !== index));
     }
   }, [allRoomChat, clickUser, nickname, setRoomid]);
 
@@ -92,40 +105,29 @@ const Chat = ({ clickUser }) => {
     setTextChat("");
   };
 
-  const showMessage = () => {
-    // chatMessage.map((chat) => {
-    //   return (
-    //     <Card sx={{ minWidth: 275 }}>
-    //       <CardContent>
-    //         <Typography variant="h5" component="div">
-    //           Word of the Day
-    //         </Typography>
-    //       </CardContent>
-    //     </Card>
-    //   );
-    // });
-  };
-
   return (
     <Grid item xs={12} md={12} style={{ height: "100%", width: "100%" }}>
       <div style={{ width: "100%", height: "443px", borderRadius: "10px" }}>
-      <Card sx={{ minWidth: 275 }}>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Word of the Day
-              </Typography>
-            </CardContent>
-          </Card>
-        {/* { chatMessage ? chatMessage.map((chat) => {
-          <Card sx={{ minWidth: 275 }}>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Word of the Day
-              </Typography>
-            </CardContent>
-          </Card>;
-        }) : <></>} */}
-        {showMessage()}
+        <Scroll>
+          {message.map((chat) => {
+            return (
+              <Card key={chat[1].date} sx={{ minWidth: 275, borderRadius:"0px" }}>
+                <CardContent style={chat[1].sender === nickname ? styleLeft : styleRight}>
+                  
+                  {chat[1].sender === nickname ? (
+                    <Sender>Me</Sender>
+                  ) : (
+                    <Sender>{chat[1].sender}</Sender>
+                  )}
+                  <DateMessage> at {chat[1].date}</DateMessage>
+                  <div style={{ marginTop:"5px"}}>
+                    {chat[1].message}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Scroll>
       </div>
       <TextField
         type="text"
@@ -143,6 +145,7 @@ const Chat = ({ clickUser }) => {
             </Stack>
           ),
         }}
+        disabled={!clickUser}
         placeholder="Nhập tin nhắn..."
         onChange={onTextInputChange}
         value={textChat}

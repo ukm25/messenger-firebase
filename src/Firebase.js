@@ -89,36 +89,24 @@ const getRoomUserID = (setAllRoomChat) => {
 };
 
 const sendMessage = (chat) => {
-  console.log(chat)
   const newMessage = firebase.database().ref("chats/").push();
   newMessage.set(chat);
 };
 
-// const getMessage = async (roomid, setMessage) => {
-
-//   firebase.database().ref('chats').orderByChild('roomid').equalTo(roomid).on('value', resp => {
-    
-//     Object.entries(resp.val()).map((snap) => {
-//       setMessage([]);
-//       return getRoomUserIDsetMessage(resp);
-//     })
-    
-//   });
-
-//   // const ref = firebase.database().ref();
-//   // ref
-//   //   .child("chats")
-//   //   .orderByChild("roomid")
-//   //   .equalTo(roomid)
-//   //   .on((snapshot) => {
-//   //     if (snapshot.exists()) {
-//   //       Object.entries(snapshot.val()).map((snap) => {
-//   //         setMessage(snap);
-//   //         return "";
-//   //       });
-//   //     }
-//   //   });
-// };
+const getMessage = async (roomid, setMessage) => {
+  const ref = firebase.database().ref();
+  ref
+    .child("chats")
+    .orderByChild("roomid")
+    .equalTo(roomid)
+    .on("value", (snapshot) => {
+      if(snapshot.exists()) {
+        setMessage([]);
+        setMessage(Object.entries(snapshot.val()));
+      }
+      
+    });
+};
 
 export {
   firebase,
@@ -126,4 +114,5 @@ export {
   getListUser,
   sendMessage,
   getRoomUserID,
+  getMessage,
 };
