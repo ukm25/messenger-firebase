@@ -6,7 +6,6 @@ import Button from "@mui/material/Button";
 import styled from "@emotion/styled";
 
 import User from "./User";
-
 import { getListUser } from "./Firebase";
 
 const style = {
@@ -23,7 +22,7 @@ const ListUser = ({ clickUser, setClickUser }) => {
   const [users, setUsers] = useState();
   const [nickname, setNickName] = useState("");
   const history = useHistory();
-  
+
   useEffect(() => {
     setNickName(localStorage.getItem("nickname"));
   }, []);
@@ -44,9 +43,13 @@ const ListUser = ({ clickUser, setClickUser }) => {
         );
       });
       return usersMap.map((user) => (
-        <User setClickUser={setClickUser} clickUser={clickUser} user={Object.entries(user[1])[0][1]}/>
-      
-        ));
+        <User
+          key={Object.entries(user[0])}
+          setClickUser={setClickUser}
+          clickUser={clickUser}
+          user={Object.entries(user[1])[0][1]}
+        />
+      ));
     } else {
       return <></>;
     }
@@ -54,17 +57,14 @@ const ListUser = ({ clickUser, setClickUser }) => {
 
   return (
     <>
-      <Typography variant="h5" gutterBottom style={{ paddingLeft: "16px", }}>
-          {nickname}
-          <Button variant="contained" onClick={onLogoutBtnClick}>
-            Logout
-          </Button>
-        </Typography>
+      <Typography variant="h5" gutterBottom style={{ paddingLeft: "16px" }}>
+        {nickname}
+        <Button variant="contained" onClick={onLogoutBtnClick}>
+          Logout
+        </Button>
+      </Typography>
       <List sx={style} component="nav" aria-label="mailbox folders">
-        <Scroll>
-        {renderUsers(users)}
-        </Scroll>
-        
+        <Scroll>{renderUsers(users)}</Scroll>
       </List>
     </>
   );

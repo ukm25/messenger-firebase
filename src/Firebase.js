@@ -1,4 +1,5 @@
 import firebase from "firebase";
+import { useState } from "react";
 import { v4 } from "uuid";
 
 const firebaseConfig = {
@@ -102,12 +103,24 @@ const getMessage = async (roomid, setMessage) => {
     .orderByChild("roomid")
     .equalTo(roomid)
     .on("value", (snapshot) => {
-      if(snapshot.exists()) {
+      if (snapshot.exists()) {
         setMessage(Object.entries(snapshot.val()));
       }
-      
     });
 };
+
+const sendImage = async (file, sender, roomid, moment) => {
+  const storageRef = firebase.storage().ref();
+  const fileRef = storageRef.child(roomid + "*" + sender + "*" + moment);
+  await fileRef.put(file);
+  // const fileUrl = await fileRef.getDownloadURL();
+};
+
+const getImage = async (image, setFileUrl) => {
+  const storageRef = firebase.storage().ref();
+  const fileRef = storageRef.child(image);
+  setFileUrl(await fileRef.getDownloadURL());
+}
 
 export {
   firebase,
@@ -116,4 +129,5 @@ export {
   sendMessage,
   getRoomUserID,
   getMessage,
+  sendImage,
 };

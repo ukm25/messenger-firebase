@@ -7,8 +7,11 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Moment from "moment";
 import styled from "@emotion/styled";
+import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
-import { sendMessage, getRoomUserID, getMessage } from "./Firebase";
+import { sendMessage, getRoomUserID, getMessage, sendImage } from "./Firebase";
 
 const Scroll = styled.div`
   height: 443px;
@@ -16,10 +19,11 @@ const Scroll = styled.div`
 `;
 
 const DateMessage = styled.span`
-font-size:13px`;
+  font-size: 13px;
+`;
 
 const Sender = styled.span`
-font-size: 17px;
+  font-size: 17px;
   font-weight: bold;
   color: green;
 `;
@@ -29,9 +33,9 @@ const styleLeft = {
   background: "#dcf8c6",
   borderRadius: ".4em",
   marginTop: "5px",
-  width:"60%",
+  width: "60%",
   right: "5%",
-  float:"right",
+  float: "right",
 };
 
 const styleRight = {
@@ -39,9 +43,20 @@ const styleRight = {
   background: "lightblue",
   borderRadius: ".4em",
   marginTop: "5px",
-  maxWidth:"60%",
+  maxWidth: "60%",
   left: "5%",
 };
+
+const Input = styled("input")({
+  display: "none",
+});
+
+const Image = styled("img")({
+  borderRadius: "8px",
+  maxWidth: "300px",
+  height: "300px",
+});
+
 const Chat = ({ clickUser }) => {
   const [textChat, setTextChat] = useState("");
   const [roomid, setRoomid] = useState("");
@@ -53,9 +68,10 @@ const Chat = ({ clickUser }) => {
 
   //get room id
   useEffect(() => {
-    getRoomUserID(setAllRoomChat)
+    getRoomUserID(setAllRoomChat);
   }, [setAllRoomChat]);
 
+  //get message for this chat
   useEffect(() => {
     setMessage([]);
     getMessage(roomid, setMessage);
@@ -74,21 +90,23 @@ const Chat = ({ clickUser }) => {
       const roomNicknameChat = allRoomChat.filter(
         (room) => room[1].nickname === nickname
       );
-      for (let i = 0; i < roomNicknameChat.length; i++) {
-        rooms = [...rooms, roomNicknameChat[i][1].roomid];
+
+      for (const roomNickname of roomNicknameChat) {
+        rooms = [...rooms, roomNickname[1].roomid];
       }
       const roomClickUserChat = allRoomChat.filter(
         (room) => room[1].nickname === clickUser
       );
 
-      for (let i = 0; i < roomClickUserChat.length; i++) {
-        rooms = [...rooms, roomClickUserChat[i][1].roomid];
+      for (const roomClickUser of roomClickUserChat) {
+        rooms = [...rooms, roomClickUser[1].roomid];
       }
 
       for (let i = 0; i < rooms.length - 1; i++) {
         for (let j = i + 1; j < rooms.length; j++) {
           if (rooms[i] === rooms[j]) {
             setRoomid(rooms[i]);
+            break;
           }
         }
       }
@@ -103,42 +121,93 @@ const Chat = ({ clickUser }) => {
       roomid: roomid,
       date: moment,
       sender: nickname,
-      message: textChat,
+      content: textChat,
+      type: "message",
     };
     sendMessage(send);
     setTextChat("");
   };
 
+  //click send image
+  const onSendImageBtnClick = (e) => {
+    const moment = Moment(new Date()).format("DD/MM/YYYY HH:mm:ss");
+    const momentImage = Moment(new Date()).format("MMMM Do YYYY, h:mm:ss a");
+    sendImage(e.target.files[0], nickname, roomid, momentImage);
+
+    const send = {
+      roomid: roomid,
+      date: moment,
+      sender: nickname,
+      content: roomid + "*" + nickname + "*" + momentImage,
+      type: "image",
+    };
+    sendMessage(send);
+  };
+
   return (
     <Grid item xs={12} md={12} style={{ height: "100%", width: "100%" }}>
       <div style={{ width: "100%", height: "443px", borderRadius: "10px" }}>
-        {clickUser ? (<Scroll>
-          {message.map((chat) => {
-            return (
-              <Card key={chat[1].date} sx={{ minWidth: 275, borderRadius:"0px", }}>
-                <CardContent style={chat[1].sender === nickname ? styleLeft : styleRight}>
-                  
-                  {chat[1].sender === nickname ? (
-                    <Sender>Me</Sender>
-                  ) : (
-                    <Sender>{chat[1].sender}</Sender>
-                  )}
-                  <DateMessage> at {chat[1].date}</DateMessage>
-                  <div style={{ marginTop:"5px"}}>
-                    {chat[1].message}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </Scroll>) : (<></>)}
-        
+        {clickUser ? (
+          <Scroll>
+            {message.map((chat) => {
+              return (
+                <Card
+                  key={chat[1].date}
+                  sx={{ minWidth: 275, borderRadius: "0px" }}
+                >
+                  <CardContent
+                    style={chat[1].sender === nickname ? styleLeft : styleRight}
+                  >
+                    {chat[1].sender === nickname ? (
+                      <Sender>Me</Sender>
+                    ) : (
+                      <Sender>{chat[1].sender}</Sender>
+                    )}
+                    <DateMessage> at {chat[1].date}</DateMessage><div style={{ marginTop: "5px" }}>
+                    {chat[1].type === "message" ? (
+                      chat[1].content
+                    ) : (
+                      // <Image src=""></Image>
+                      <Image src/>
+                    )}</div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </Scroll>
+        ) : (
+          <CircularProgress
+            style={{
+              left: "50%",
+              right: "50%",
+              position: "absolute",
+              top: "50vh",
+            }}
+          />
+        )}
       </div>
-      
+
       <TextField
         type="text"
         fullWidth
         InputProps={{
+          startAdornment: (
+            <label htmlFor="icon-button-file">
+              <Input
+                accept="image/*"
+                id="icon-button-file"
+                type="file"
+                onChange={onSendImageBtnClick}
+              />
+              <IconButton
+                color="primary"
+                component="span"
+                disabled={!clickUser}
+              >
+                <PhotoCamera />
+              </IconButton>
+            </label>
+          ),
           endAdornment: (
             <Stack spacing={2} direction="row">
               <Button
