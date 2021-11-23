@@ -1,5 +1,4 @@
 import firebase from "firebase";
-import { useState } from "react";
 import { v4 } from "uuid";
 
 const firebaseConfig = {
@@ -109,17 +108,22 @@ const getMessage = async (roomid, setMessage) => {
     });
 };
 
-const sendImage = async (file, sender, roomid, moment) => {
+const sendImage = async (file, id) => {
   const storageRef = firebase.storage().ref();
-  const fileRef = storageRef.child(roomid + "*" + sender + "*" + moment);
+  const fileRef = storageRef.child(id);
   await fileRef.put(file);
-  // const fileUrl = await fileRef.getDownloadURL();
 };
 
-const getImage = async (image, setFileUrl) => {
+const getImage = async (imageIds, setImage) => {
   const storageRef = firebase.storage().ref();
-  const fileRef = storageRef.child(image);
-  setFileUrl(await fileRef.getDownloadURL());
+  imageIds.map(id => {
+    const fileRef = storageRef.child(id);
+    fileRef.getDownloadURL().then((snapshot) => {
+      setImage(prev => [...prev, [id,snapshot]]);
+    });
+
+    return "";
+  });
 }
 
 export {
@@ -130,4 +134,5 @@ export {
   getRoomUserID,
   getMessage,
   sendImage,
+  getImage,
 };

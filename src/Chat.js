@@ -10,8 +10,15 @@ import styled from "@emotion/styled";
 import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import { v4 } from "uuid";
 
-import { sendMessage, getRoomUserID, getMessage, sendImage } from "./Firebase";
+import {
+  sendMessage,
+  getRoomUserID,
+  getMessage,
+  sendImage,
+  getImage,
+} from "./Firebase";
 
 const Scroll = styled.div`
   height: 443px;
@@ -51,16 +58,12 @@ const Input = styled("input")({
   display: "none",
 });
 
-const Image = styled("img")({
-  borderRadius: "8px",
-  maxWidth: "300px",
-  height: "300px",
-});
-
 const Chat = ({ clickUser }) => {
   const [textChat, setTextChat] = useState("");
   const [roomid, setRoomid] = useState("");
   const [message, setMessage] = useState([]);
+  const [image, setImage] = useState([]);//save id and link image
+  const [imageSend, setImageSend] = useState([]);
 
   const nickname = localStorage.getItem("nickname");
 
@@ -76,6 +79,17 @@ const Chat = ({ clickUser }) => {
     setMessage([]);
     getMessage(roomid, setMessage);
   }, [roomid]);
+
+  //get all link image of this message to show
+  useEffect(() => {
+    if (message) {
+      const mess = message.filter((mess) => mess[1].type === "image"); //get chat image
+      const messMap = mess.map((chat) => chat[1].content); //get id image
+      if (messMap) {
+        getImage(messMap, setImage);
+      }
+    }
+  }, [message, imageSend]);
 
   //input text chat
   const onTextInputChange = (e) => {
@@ -130,51 +144,77 @@ const Chat = ({ clickUser }) => {
 
   //click send image
   const onSendImageBtnClick = (e) => {
+    setImageSend(e);
     const moment = Moment(new Date()).format("DD/MM/YYYY HH:mm:ss");
-    const momentImage = Moment(new Date()).format("MMMM Do YYYY, h:mm:ss a");
-    sendImage(e.target.files[0], nickname, roomid, momentImage);
+    const id = v4();
+    sendImage(e.target.files[0], id);
 
     const send = {
       roomid: roomid,
       date: moment,
       sender: nickname,
-      content: roomid + "*" + nickname + "*" + momentImage,
+      content: id,
       type: "image",
     };
     sendMessage(send);
+    setImageSend(""); //đảm bảo việc gửi liên tiếp 1 ảnh không bị fail do ko onChange
   };
 
+  //message, image,...
+  const contentShow = (chat) => {
+    if (chat[1].type === "message") {
+      return <div style={{ marginTop: "5px" }}>{chat[1].content}</div>;
+    } else {
+      if (chat[1].type === "image") {
+        const id = chat[1].content;
+        const link = image.filter((img) => img[0] === id);
+        if (link.length !== 0) {
+          console.log("link", link);
+          return (
+            <div style={{ marginTop: "5px" }}>
+              <img
+                alt="send"
+                src={link[0][1]}
+                style={{
+                  borderRadius: "8px",
+                  maxWidth: "100%",
+                  height: "auto",
+                }}
+              />
+            </div>
+          );
+        }
+        return <></>;
+      }
+    }
+  };
+
+  //sender, time sender,...
+  const showMessage = () => {
+    return message.map((chat) => {
+      return (
+        <Card key={chat[1].date} sx={{ minWidth: 275, borderRadius: "0px" }}>
+          <CardContent
+            style={chat[1].sender === nickname ? styleLeft : styleRight}
+          >
+            {chat[1].sender === nickname ? (
+              <Sender>Me</Sender>
+            ) : (
+              <Sender>{chat[1].sender}</Sender>
+            )}
+            <DateMessage> at {chat[1].date}</DateMessage>
+
+            {contentShow(chat)}
+          </CardContent>
+        </Card>
+      );
+    });
+  };
   return (
     <Grid item xs={12} md={12} style={{ height: "100%", width: "100%" }}>
       <div style={{ width: "100%", height: "443px", borderRadius: "10px" }}>
         {clickUser ? (
-          <Scroll>
-            {message.map((chat) => {
-              return (
-                <Card
-                  key={chat[1].date}
-                  sx={{ minWidth: 275, borderRadius: "0px" }}
-                >
-                  <CardContent
-                    style={chat[1].sender === nickname ? styleLeft : styleRight}
-                  >
-                    {chat[1].sender === nickname ? (
-                      <Sender>Me</Sender>
-                    ) : (
-                      <Sender>{chat[1].sender}</Sender>
-                    )}
-                    <DateMessage> at {chat[1].date}</DateMessage><div style={{ marginTop: "5px" }}>
-                    {chat[1].type === "message" ? (
-                      chat[1].content
-                    ) : (
-                      // <Image src=""></Image>
-                      <Image src/>
-                    )}</div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </Scroll>
+          <Scroll>{showMessage()}</Scroll>
         ) : (
           <CircularProgress
             style={{
@@ -198,6 +238,8 @@ const Chat = ({ clickUser }) => {
                 id="icon-button-file"
                 type="file"
                 onChange={onSendImageBtnClick}
+                value={imageSend}
+                disabled={!clickUser}
               />
               <IconButton
                 color="primary"
