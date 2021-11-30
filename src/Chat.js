@@ -11,6 +11,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { v4 } from "uuid";
+import ScrollToBottom from "react-scroll-to-bottom";
 
 import {
   sendMessage,
@@ -20,7 +21,7 @@ import {
   getImage,
 } from "./Firebase";
 
-const Scroll = styled.div`
+const Scroll = styled(ScrollToBottom)`
   height: 443px;
   overflow-y: scroll;
 `;
@@ -62,7 +63,7 @@ const Chat = ({ clickUser }) => {
   const [textChat, setTextChat] = useState("");
   const [roomid, setRoomid] = useState("");
   const [message, setMessage] = useState([]);
-  const [image, setImage] = useState([]);//save id and link image
+  const [image, setImage] = useState([]); //save id and link image
   const [imageSend, setImageSend] = useState([]);
 
   const nickname = localStorage.getItem("nickname");
@@ -169,7 +170,6 @@ const Chat = ({ clickUser }) => {
         const id = chat[1].content;
         const link = image.filter((img) => img[0] === id);
         if (link.length !== 0) {
-          console.log("link", link);
           return (
             <div style={{ marginTop: "5px" }}>
               <img
@@ -214,6 +214,7 @@ const Chat = ({ clickUser }) => {
     <Grid item xs={12} md={12} style={{ height: "100%", width: "100%" }}>
       <div style={{ width: "100%", height: "443px", borderRadius: "10px" }}>
         {clickUser ? (
+          
           <Scroll>{showMessage()}</Scroll>
         ) : (
           <CircularProgress
